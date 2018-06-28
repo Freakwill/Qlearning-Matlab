@@ -1,5 +1,5 @@
 # Qlearning-Matlab
-implement Q-learning by Matlab.
+Implement Q-learning by Matlab.
 
 
 
@@ -17,12 +17,18 @@ Recommended to inherit from `QAgent`. See `MyQAgent` as an example.
 
 
 
-## example
+## Example
 
 maze.m
 
+story: a robot with 10 power tries to find its heaven that is far from it. It has to get the resource first! Come bro! Here we go.
+
+note: the dashline is the direction of moving.
+
+![screenshot.png](/Users/william/Programming/myGithub/Qlearning-Matlab/screenshot.png)
 
 
-## lines
+
+## Lines
 
 Tools for drawing.
