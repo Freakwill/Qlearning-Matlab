@@ -29,9 +29,17 @@ classdef Agent < rl.Object
             % state transition, then draw it
             obj = obj.transition();
             % animation
-            lh=obj.draw();
-            pause(.05);
-            delete(lh);
+            if obj.moved()
+                lh=obj.draw();   
+                pause(.05);
+                delete(lh);
+            else
+                pause(.05);
+            end
+        end
+        
+        function tf=moved(obj)
+            tf = isempty(obj.last_state) || any(obj.last_state(1:2)~= obj.state(1:2));
         end
         
         function pos=get_pair(obj)

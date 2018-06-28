@@ -97,20 +97,19 @@ classdef MyQAgent < rl.QAgent
 
         function q = guessQ(obj)
             j = index(obj.stateList(1:2,:), obj.state(1:2));
-            if j ~= 0
+            if j != 0
                 q = obj.QTable(j,:);
             else      % it is a new position
                 j = index(obj.stateList(1,:), obj.state(1));
-                if j ~= 0
+                if j != 0
                     q = obj.QTable(j,:);
                 
                 else
-                    j = index(obj.stateList(2,:), obj.state(2));
-                    if j ~= 0
-                        q = obj.QTable(j,:);
-                    else
-                        q = zeros(1, length(obj.action_space));
-                    end
+                    j = index(obj.stateList(1,:), obj.state(1));
+                if j != 0
+                    q = obj.QTable(j,:);
+                else
+                    q = zeros(1, length(obj.action_space));
                 end
             end   
         end
