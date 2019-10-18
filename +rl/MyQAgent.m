@@ -9,7 +9,7 @@ classdef MyQAgent < rl.QAgent
         
         function obj=MyQAgent(name, env, init_state)
             if nargin <= 2
-                init_state=[1; 1; 10];
+                init_state=[1; 1; 10; 0];
             end
             obj = obj@rl.QAgent(name, env, init_state);
             obj.action_space = ['^', 'v', '<', '>'];
@@ -27,39 +27,41 @@ classdef MyQAgent < rl.QAgent
             switch obj.action
                 case '^'
                     if obj.state(1)<obj.env.size(1)
-                        obj.state=obj.state+[1;0;-1];
+                        obj.state=obj.state+[1;0;-1;0];
                     end
                 case '>'
                     if obj.state(2)<obj.env.size(2)
-                        obj.state=obj.state+[0;1;-1];
+                        obj.state=obj.state+[0;1;-1;0];
                     end
                 case 'v'
                     if obj.state(1)>1
-                        obj.state=obj.state+[-1;0;-1];
+                        obj.state=obj.state+[-1;0;-1;0];
                     end
                 case '<'
                     if obj.state(2)>1
-                        obj.state=obj.state+[0;-1;-1];
+                        obj.state=obj.state+[0;-1;-1;0];
                     end
                 otherwise
                     error('No such action');
             end
-            if obj.state(1)==5 && ismember(obj.state(2),[4,5,6,7]) ... %obj.isat('wall')
+            if obj.state(1)==5 && ismember(obj.state(2),[4,5,6]) ... %obj.isat('wall')
                  || obj.state(1)==3 && ismember(obj.state(2), [1,2,3]) 
                 obj.state=obj.last_state;
             end
         end
 
-        function lh=draw(obj)
-            if isempty(obj.last_state)
+        function obj=draw(obj)
+            if ~ obj.moved()
                 pos = obj.get_position();
-                lh=line('Parent',obj.env.axes,'Xdata', pos(2)-0.5,'Ydata', pos(1)-0.5, 'Marker','o','MarkerFaceColor','c', 'MarkerSize',18, 'LineStyle', '--');
+                obj.handle=line('Parent',obj.env.axes,'Xdata', pos(2)-0.5,'Ydata', pos(1)-0.5, 'Marker','o','MarkerFaceColor','c', 'MarkerSize',18, 'LineStyle', '-.');
             else
                 pos = obj.get_pair();
                 % text(obj.env.axes, 'Position', pos([2,1])-0.5, 'String', obj.name, 'FontSize', 16);
-                lh=animline([pos{1}(2)-0.5, pos{2}(2)-0.5], [pos{1}(1)-0.5, pos{2}(1)-0.5], 'Parent',obj.env.axes, 'Gradient',7,'Time',.05, 'MoveMarker','o','MarkerFaceColor','c', 'MarkerSize',18, 'LineStyle', '--');
+                obj.handle=move(pos{1}-0.5, pos{2}-0.5, 'Parent',obj.env.axes, 'Marker', 'o', 'MarkerFaceColor','c', 'MarkerSize',18);
             end
             obj.show_info();
+            pause(.01);
+            delete(obj.handle);
         end
         
         function show_info(obj)
@@ -78,20 +80,21 @@ classdef MyQAgent < rl.QAgent
             if obj.isat('Trap')
                 r = -1;
             elseif obj.isat('Heaven')
-                r = 10;
+                r = 50;
             elseif obj.isat('Hell')
                 r = -10;
             elseif obj.isat('Resource')
-                if any(obj.state ~= obj.last_state)
+                if any(obj.state ~= obj.last_state) && obj.state(4)<2
                     r = 0.1;
                 end
                 if obj.state(3)>10
-                    r = -1;
-                elseif obj.state(3)>5
                     r = -.5;
+                elseif obj.state(3)>5
+                    r = -.3;
                 end
+                obj.last_state(4) = obj.last_state(4)+1;
             else
-                r = -0.1;
+                r = -0.05;
             end
         end
 
@@ -133,10 +136,20 @@ classdef MyQAgent < rl.QAgent
             else
                 xlabel(obj.axes, 'String', 'Fail', 'FontSize', 16);
             end
-            pause(.2);
+            pause(.1);
         end
 
     end
     
 end
 
+
+function h=move(s, t, varargin)
+    d=t-s;
+    for i = 0:9
+        h=line(s(2)+d(2)/10*i,s(1)+d(1)/10*i, varargin{:});
+        pause(0.001);
+        delete(h);
+    end
+    h=line(t(2),t(1), varargin{:});
+end
